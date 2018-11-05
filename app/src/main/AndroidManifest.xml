@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="trianglepoint.warframe_viewer_android">
-
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <application
             android:allowBackup="true"
             android:icon="@mipmap/ic_launcher"
@@ -16,6 +16,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".NewsActivity"/>
+        <activity android:name=".ImagesActivity"/>
         <meta-data android:name="firebase_messaging_auto_init_enabled"
                    android:value="false"/>
         <service android:name=".firebaseMessagingService">

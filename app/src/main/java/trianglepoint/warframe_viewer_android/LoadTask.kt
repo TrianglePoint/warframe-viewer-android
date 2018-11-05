@@ -8,7 +8,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class LoadTask() : AsyncTask<String, Void, String>(){
-    private val TAG = "LoadTask"
+    private val TAG = "LoadTask_1"
 
     override fun doInBackground(vararg url: String?): String {
         val url = URL(url[0])

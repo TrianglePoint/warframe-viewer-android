@@ -1,111 +1,99 @@
 package trianglepoint.warframe_viewer_android
 
 import android.content.Intent
-import android.graphics.Typeface
-import android.net.Uri
-import android.support.v7.app.AppCompatActivity
+import android.media.Image
 import android.os.Bundle
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.support.design.widget.Snackbar
+import android.support.v7.app.AppCompatActivity
+import android.util.Log
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.android.synthetic.main.activity_images.*
 import kotlinx.android.synthetic.main.activity_main.*
-import org.json.JSONArray
-import org.json.JSONObject
 
-class MainActivity : AppCompatActivity() {
-    private val TAG = "MainActivity"
-    val url = "https://warframe-viewer.herokuapp.com"
+class MainActivity : AppCompatActivity(){
+    private val TAG = "MainActivity_1"
+    private val RC_SIGN_IN: Int = 9001
+    private var mAuth: FirebaseAuth? = null
+    var mGoogleSignInClient : GoogleSignInClient? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val firebaseInstanceIDService = firebaseInstanceIDService()
-        firebaseInstanceIDService.onTokenRefresh()
 
-        loadScreen(lLayout)
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
+        mAuth = FirebaseAuth.getInstance()
+
+        btnToNews.setOnClickListener {
+            val intent = Intent(this, NewsActivity::class.java)
+            startActivity(intent)
+        }
+        btnToImages.setOnClickListener {
+            // Need login. so if not login, should login.
+            if(mAuth?.currentUser !is FirebaseUser) {
+                signIn()
+            }else {
+                // if already login, go to images.
+                val intent = Intent(this, ImagesActivity::class.java)
+                startActivity(intent)
+            }
+        }
     }
 
-    fun loadScreen(lLayout: LinearLayout){
-
-        // Load Json data as string.
-        val result = LoadTask().execute("$url/json").get()
-
-        // and convert string to json.
-        val jsonObject = JSONObject(result)
-
-        lLayout.removeAllViews()
-
-        // set the design of Header.
-        val setTextSize = 26F
-        val setMargin = 40
-
-        var textView = TextView(this)
-        lLayout.addView(textView)
-
-        var layoutParams = (textView.layoutParams as LinearLayout.LayoutParams).apply {
-            bottomMargin = setMargin
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == RC_SIGN_IN){
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data) as Task<GoogleSignInAccount>
+            handleSignInResult(task)
         }
-        textView.layoutParams = layoutParams
-        textView.text = "이벤트"
-        textView.textSize = setTextSize
-        textView.typeface = (Typeface.DEFAULT_BOLD)
-
-
-        // and take out the jsonArray.
-        var jsonArray = jsonObject.get("events") as JSONArray
-
-        for(i in 0..(jsonArray.length()-1)) {
-            textView = TextView(this)
-            val data = arrayOf(jsonArray.getJSONObject(i).getString("subject"),
-                jsonArray.getJSONObject(i).getString("link"))
-            lLayout.addView(textView)
-
-            textView.setOnClickListener {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.setData(Uri.parse(data[1]))
-                startActivity(intent)
+    }
+    private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>){
+        try {
+            val account = completedTask.getResult(ApiException::class.java)
+            if(account is GoogleSignInAccount) {
+                firebaseAuthWithGoogle(account)
+                Log.d(TAG, "LOGIN!")
             }
-
-            layoutParams = (textView.layoutParams as LinearLayout.LayoutParams).apply {
-                bottomMargin = setMargin / 2
-            }
-            textView.layoutParams = layoutParams
-            textView.text = (data[0])
-            textView.textSize = setTextSize / 2
+        }catch (e: ApiException){
+            Log.w(TAG, "signInResult: failed code= ${e.stackTrace}")
         }
+    }
 
-        textView = TextView(this)
-        lLayout.addView(textView)
+    private fun firebaseAuthWithGoogle(acct: GoogleSignInAccount){
+        Log.d(TAG, "firebaseAuthwithGoogle: ${acct.id}")
 
-        layoutParams = (textView.layoutParams as LinearLayout.LayoutParams).apply {
-            topMargin = setMargin
-            bottomMargin = setMargin
-        }
-        textView.layoutParams = layoutParams
-        textView.text = "업데이트"
-        textView.textSize = setTextSize
-        textView.typeface = (Typeface.DEFAULT_BOLD)
+        val credential: AuthCredential = GoogleAuthProvider.getCredential(acct.idToken, null)
 
+        mAuth?.signInWithCredential(credential)
+            ?.addOnCompleteListener {
+                if (it.isSuccessful){
+                    Log.d(TAG, "signInWithCredential: success")
 
-        jsonArray = jsonObject.get("update") as JSONArray
-
-        for(i in 0..(jsonArray.length()-1)) {
-            textView = TextView(this)
-            val data = arrayOf(jsonArray.getJSONObject(i).getString("subject"),
-                jsonArray.getJSONObject(i).getString("link"))
-            lLayout.addView(textView)
-
-            textView.setOnClickListener {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.setData(Uri.parse(data[1]))
-                startActivity(intent)
+                    // did success login and now, go to images.
+                    val intent = Intent(this, ImagesActivity::class.java)
+                    startActivity(intent)
+                }else{
+                    Log.w(TAG, "signInWithCredential: failure", it.exception)
+                    Snackbar.make(mainLayout, "Authentication Failed", Snackbar.LENGTH_SHORT).show()
+                }
             }
+    }
 
-            layoutParams = (textView.layoutParams as LinearLayout.LayoutParams).apply {
-                bottomMargin = setMargin / 2
-            }
-            textView.layoutParams = layoutParams
-            textView.text = (data[0])
-            textView.textSize = setTextSize / 2
-        }
+    private fun signIn(){
+        Log.d(TAG, "function signIn")
+        val signInIntent = mGoogleSignInClient?.signInIntent
+        startActivityForResult(signInIntent, RC_SIGN_IN)
     }
 }

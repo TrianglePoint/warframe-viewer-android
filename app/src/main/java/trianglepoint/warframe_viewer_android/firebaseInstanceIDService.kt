@@ -9,11 +9,12 @@ class firebaseInstanceIDService : FirebaseInstanceIdService() {
     override public fun onTokenRefresh(){
         val refreshedToken = FirebaseInstanceId.getInstance().getToken()
         FirebaseMessaging.getInstance().isAutoInitEnabled = true
+        FirebaseMessaging.getInstance().subscribeToTopic("news")
+
         Log.d("token","Refresed token: " + refreshedToken)
 
         sendRegistrationToServer(refreshedToken)
     }
     private fun sendRegistrationToServer(token: String?){
-
     }
 }
