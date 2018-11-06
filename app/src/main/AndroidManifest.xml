@@ -17,6 +17,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".NewsActivity"/>
+        <activity android:name=".ImagesMenuActivity"/>
         <activity android:name=".ImagesActivity"/>
         <meta-data android:name="firebase_messaging_auto_init_enabled"
                    android:value="false"/>

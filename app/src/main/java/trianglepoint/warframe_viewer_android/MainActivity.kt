@@ -1,7 +1,6 @@
 package trianglepoint.warframe_viewer_android
 
 import android.content.Intent
-import android.media.Image
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
@@ -16,7 +15,6 @@ import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
-import kotlinx.android.synthetic.main.activity_images.*
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(){
@@ -46,7 +44,7 @@ class MainActivity : AppCompatActivity(){
                 signIn()
             }else {
                 // if already login, go to images.
-                val intent = Intent(this, ImagesActivity::class.java)
+                val intent = Intent(this, ImagesMenuActivity::class.java)
                 startActivity(intent)
             }
         }
@@ -82,7 +80,7 @@ class MainActivity : AppCompatActivity(){
                     Log.d(TAG, "signInWithCredential: success")
 
                     // did success login and now, go to images.
-                    val intent = Intent(this, ImagesActivity::class.java)
+                    val intent = Intent(this, ImagesMenuActivity::class.java)
                     startActivity(intent)
                 }else{
                     Log.w(TAG, "signInWithCredential: failure", it.exception)

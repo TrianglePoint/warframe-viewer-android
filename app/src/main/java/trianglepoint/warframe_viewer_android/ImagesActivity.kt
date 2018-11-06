@@ -6,10 +6,9 @@ import android.provider.MediaStore
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.firebase.auth.*
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.model.GlideUrl
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_images.*
 
@@ -17,25 +16,24 @@ class ImagesActivity : AppCompatActivity(){
     private val TAG = "ImagesActivity_1"
     private val SELECT_IMAGE = 1
     private var mAuth: FirebaseAuth? = null
-    var mGoogleSignInClient : GoogleSignInClient? = null
     var storage : FirebaseStorage? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_images)
-        storage = FirebaseStorage.getInstance()
 
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
-            .requestEmail()
-            .build()
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
+        storage = FirebaseStorage.getInstance()
         mAuth = FirebaseAuth.getInstance()
 
-        sign_out_button.setOnClickListener{signOut()}
+        // TEST.
+        var storageRef = storage?.reference
 
-        testBtn.setOnClickListener {
 
+        GlideApp.with(this)
+            .load(storageRef?.child("images/ember/${mAuth?.uid}/553167208"))
+            .into(imageView_01)
+
+
+        button_upload.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             startActivityForResult(intent, SELECT_IMAGE)
         }
@@ -53,6 +51,8 @@ class ImagesActivity : AppCompatActivity(){
 
                     storageRef = storageRef?.child("images/${character}/${mAuth?.uid}/${file.lastPathSegment}")
 
+                    Log.d(TAG, "tag ${file.path}")
+
                     // Upload File to Firebase Storage.
                     val uploadTask = storageRef?.putFile(data.data)
                     uploadTask?.addOnSuccessListener {
@@ -66,13 +66,5 @@ class ImagesActivity : AppCompatActivity(){
                 }
             }
         }
-    }
-    private fun signOut(){
-        // firebase sign out.
-        mAuth?.signOut()
-
-        // google sign out.
-        mGoogleSignInClient?.signOut()
-        finish()
     }
 }
