@@ -27,8 +27,15 @@
             android:text="ember"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/testBtn" app:layout_constraintTop_toTopOf="parent"
+            android:id="@+id/btn_ember" app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginTop="172dp"
             app:layout_constraintEnd_toEndOf="parent"/>
+    <Button
+            android:text="ash"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_ash" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@+id/btn_ember"
+            android:layout_marginStart="34dp"/>
 
 </android.support.constraint.ConstraintLayout>

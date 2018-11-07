@@ -2,15 +2,11 @@ package trianglepoint.warframe_viewer_android
 
 import android.content.Intent
 import android.os.Bundle
-import android.provider.MediaStore
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.*
-import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_images_menu.*
 
 class ImagesMenuActivity : AppCompatActivity(){
@@ -31,8 +27,15 @@ class ImagesMenuActivity : AppCompatActivity(){
 
         sign_out_button.setOnClickListener{signOut()}
 
-        testBtn.setOnClickListener {
+        // The Button, of the all characters.
+        btn_ash.setOnClickListener {
             val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "ash")
+            startActivity(intent)
+        }
+        btn_ember.setOnClickListener {
+            val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "ember")
             startActivity(intent)
         }
     }
