@@ -28,6 +28,19 @@ class ImagesActivity : AppCompatActivity(){
     var storage : FirebaseStorage? = null
     var docRef : DocumentReference? = null
     var adapter : CustomAdapter? = null
+
+    // For floating button.
+    // unPress(normal), press(touch, long touch, ...)
+    val stateList = arrayOf(intArrayOf(-android.R.attr.state_pressed), intArrayOf(android.R.attr.state_pressed))
+
+    // Button color.
+    val color_saturation = Color.rgb(33, 127, 209)
+    val color_saturation_gray = Color.rgb(120, 120, 120)
+    val openColor = Color.rgb(233, 233, 233)
+    val closeColor_touchMenu = Color.rgb(33, 33, 33)
+    val closeColor_delete = Color.rgb(255, 68, 68)
+    val closeColor_unable = Color.rgb(153, 153, 153)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_images)
@@ -46,67 +59,110 @@ class ImagesActivity : AppCompatActivity(){
         val fireCollection = FirebaseFirestore.getInstance().collection("images/${character}/${mAuth?.uid}")
         adapter = CustomAdapter(layoutInflater)
         adapter?.storageRef = storageRef
-        load_imagesName(fireCollection)
+        load_imagesName(fireCollection, -1)
 
         GlideApp.with(this)
             .load(storageRef?.child("public/nothing.jpg"))
             .into(noneImage)
 
         touchMenuButton.setOnClickListener {
-            // unPress(normal), press(touch, long touch, ...)
-            val stateList = arrayOf(intArrayOf(-android.R.attr.state_pressed), intArrayOf(android.R.attr.state_pressed))
-            val openColor = Color.rgb(233, 233, 233)
-            val closeColor = Color.rgb(33, 33, 33)
-            val closeColor_delete = Color.rgb(255, 68, 68)
-
             // Open touchMenu.
             if(touchMenuLayout.visibility == View.GONE) {
                 touchMenuLayout.visibility = View.VISIBLE
-                touchMenuButton.backgroundTintList = ColorStateList(stateList, intArrayOf(openColor, closeColor))
+                touchMenuButton.backgroundTintList = ColorStateList(stateList, intArrayOf(openColor, closeColor_touchMenu))
             }
             // Close touchMenu.
             else{
                 touchMenuLayout.visibility = View.GONE
-                touchMenuButton.backgroundTintList = ColorStateList(stateList, intArrayOf(closeColor, openColor))
+                touchMenuButton.backgroundTintList = ColorStateList(stateList, intArrayOf(closeColor_touchMenu, openColor))
 
                 deleteMenuLayout.visibility = View.GONE
                 button_delete.backgroundTintList = ColorStateList(stateList, intArrayOf(closeColor_delete, openColor))
             }
+        }
+        button_saturation.setOnClickListener {
+            button_saturation.backgroundTintList = ColorStateList(stateList, intArrayOf(closeColor_unable, openColor))
+            button_saturation.isEnabled = false
+
+            // Convert saturation.
+            adapter?.wantGray = !(adapter?.wantGray as Boolean)
+
+            load_imagesName(fireCollection, -1)
         }
         button_upload.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             startActivityForResult(intent, SELECT_IMAGE)
         }
         button_delete.setOnClickListener {
-            // unPress(normal), press(touch, long touch, ...)
-            val stateList = arrayOf(intArrayOf(-android.R.attr.state_pressed), intArrayOf(android.R.attr.state_pressed))
-            val openColor = Color.rgb(233, 233, 233)
-            val closeColor = Color.rgb(255, 68, 68)
-
             // Open deleteMenu.
             if(deleteMenuLayout.visibility == View.GONE) {
                 deleteMenuLayout.visibility = View.VISIBLE
-                button_delete.backgroundTintList = ColorStateList(stateList, intArrayOf(openColor, closeColor))
+                button_delete.backgroundTintList = ColorStateList(stateList, intArrayOf(openColor, closeColor_delete))
             }
             // Close deleteMenu.
             else{
                 deleteMenuLayout.visibility = View.GONE
-                button_delete.backgroundTintList = ColorStateList(stateList, intArrayOf(closeColor, openColor))
+                button_delete.backgroundTintList = ColorStateList(stateList, intArrayOf(closeColor_delete, openColor))
             }
         }
         button_delete_no.setOnClickListener {
-            // unPress(normal), press(touch, long touch, ...)
-            val stateList = arrayOf(intArrayOf(-android.R.attr.state_pressed), intArrayOf(android.R.attr.state_pressed))
-            val openColor = Color.rgb(233, 233, 233)
-            val closeColor = Color.rgb(255, 68, 68)
-            
             // Close deleteMenu.
             deleteMenuLayout.visibility = View.GONE
-            button_delete.backgroundTintList = ColorStateList(stateList, intArrayOf(closeColor, openColor))
+            button_delete.backgroundTintList = ColorStateList(stateList, intArrayOf(closeColor_delete, openColor))
+        }
+        button_delete_yes.setOnClickListener {
+            touchMenuLayout.visibility = View.GONE
+            touchMenuButton.backgroundTintList = ColorStateList(stateList, intArrayOf(closeColor_unable, openColor))
+            touchMenuButton.isEnabled = false
+
+            deleteMenuLayout.visibility = View.GONE
+            button_delete.backgroundTintList = ColorStateList(stateList, intArrayOf(closeColor_delete, openColor))
+
+            // Position of want delete image.
+            val currentItem = imagePager.currentItem
+
+            // Close deleteMenu.
+            deleteMenuLayout.visibility = View.GONE
+            button_delete.backgroundTintList = ColorStateList(stateList, intArrayOf(closeColor_delete, openColor))
+
+            val arr_name = adapter?.getarr_name() as ArrayList<String>
+            Log.d(TAG, "delete position: $currentItem")
+
+            val deleteRef = storageRef?.child("${arr_name[currentItem]}")
+            // Delete image. can't recovery!
+            deleteRef?.delete()
+                ?.addOnCompleteListener {
+                    touchMenuButton.backgroundTintList =
+                            ColorStateList(stateList, intArrayOf(closeColor_touchMenu, openColor))
+                    touchMenuButton.isEnabled = true
+                    if (it.isSuccessful) {
+                        Log.d(TAG, "Success delete the image")
+                        Snackbar.make(imagesLayout, "Deleted image", Snackbar.LENGTH_SHORT).show()
+
+                        fireCollection.whereEqualTo("path", arr_name[currentItem]).get()
+                            .addOnSuccessListener {
+                                it.forEach {
+                                    it.reference.delete()
+                                        .addOnSuccessListener {
+                                            Log.d(TAG, "Success delete on firestore")
+                                            load_imagesName(fireCollection, currentItem)
+                                        }
+                                        .addOnFailureListener {
+                                            Log.d(TAG, "Fail delete on firestore")
+                                        }
+                                }
+                            }
+                            .addOnFailureListener {
+                                Log.d(TAG, "Fail get on firestore")
+                            }
+                    }else{
+                        Log.d(TAG, "Fail delete the image")
+                    }
+                }
         }
     }
 
-    fun load_imagesName(fireCollection: CollectionReference){
+    fun load_imagesName(fireCollection: CollectionReference, deletePosition: Int){
         var array: ArrayList<String> = ArrayList()
         loadingImages.visibility = View.VISIBLE
         fireCollection.get()
@@ -117,13 +173,50 @@ class ImagesActivity : AppCompatActivity(){
                 adapter?.setarr_name(array)
                 var currentPostion = imagePager.currentItem
                 imagePager.adapter = adapter
-                imagePager.currentItem = currentPostion
+
+                // For keep 'current' do viewing position.
+                // If deletePosition is not -1, did deleted image.
+                if(deletePosition != -1 && currentPostion > deletePosition) {
+                    currentPostion -= 1
+                }
+                /*
+                [ ] : currentPosition, variable value.
+                ' ' : really current viewing position.
+                { } : deletePosition, variable value.
+
+                For example, currentPosition is 4. (0,1,2,3,['4'],5)
+                deletePosition is 2. (0,1,{2},3,['4'],5)
+                when complete delete, left 4 images.
+                really current position is 3, but currentPosition is 4. (0,1,{ },2,'3',[4])
+                So, subtract -1 on currentPosition. (0,1,{ },2,['3'],4)
+                 */
+
+                // If delete last position image.
+                if(currentPostion >= array.size){
+                    // If array.size - 1 is negative number, don't worry. currentItem is not become negative number.
+                    imagePager.currentItem = array.size - 1
+                }else {
+                    imagePager.currentItem = currentPostion
+                }
+
                 if(array.size == 0){
+                    button_saturation.visibility = View.GONE
+                    button_delete.visibility = View.GONE
                     noneImage.visibility = View.VISIBLE
                 }else{
+                    button_saturation.visibility = View.VISIBLE
+                    button_delete.visibility = View.VISIBLE
                     noneImage.visibility = View.GONE
                 }
                 loadingImages.visibility = View.GONE
+                if(!(button_saturation.isEnabled)){
+                    if(adapter?.wantGray as Boolean){
+                        button_saturation.backgroundTintList = ColorStateList(stateList, intArrayOf(color_saturation_gray, openColor))
+                    }else{
+                        button_saturation.backgroundTintList = ColorStateList(stateList, intArrayOf(color_saturation, openColor))
+                    }
+                    button_saturation.isEnabled = true
+                }
             }
             .addOnFailureListener {
                 Log.w(TAG, "Fail the fireCollection.get()")
@@ -140,33 +233,47 @@ class ImagesActivity : AppCompatActivity(){
                     val file = data.data
                     var image = HashMap<String, Any>()
 
-                    // Set path of storage.
-                    storageRef = storageRef?.child("images/${character}/${mAuth?.uid}/${file.lastPathSegment}")
-
                     var currentTime = System.currentTimeMillis()
+
+                    // Set path of storage.
+                    storageRef = storageRef?.child("images/${character}/${mAuth?.uid}/${file.lastPathSegment}_$currentTime")
+
                     docRef = FirebaseFirestore.getInstance().document("/images/${character}/${mAuth?.uid}/$currentTime")
-                    image.put("name", file.lastPathSegment)
-                    image.put("path", "/images/${character}/${mAuth?.uid}/${file.lastPathSegment}")
+                    image.put("name", "${file.lastPathSegment}_$currentTime")
+                    image.put("path", "/images/${character}/${mAuth?.uid}/${file.lastPathSegment}_$currentTime")
                     image.put("date_upload", Date(currentTime))
+
+                    touchMenuLayout.visibility = View.GONE
+                    touchMenuButton.backgroundTintList = ColorStateList(stateList, intArrayOf(closeColor_unable, openColor))
+                    touchMenuButton.isEnabled = false
+
+                    deleteMenuLayout.visibility = View.GONE
+                    button_delete.backgroundTintList = ColorStateList(stateList, intArrayOf(closeColor_delete, openColor))
 
                     // Upload File to Firebase Storage.
                     val uploadTask = storageRef?.putFile(data.data)
-                    uploadTask?.addOnSuccessListener {
-                        Log.d(TAG, "Success upload the ${file.lastPathSegment}")
-                        Snackbar.make(imagesLayout, "Success upload the ${file.lastPathSegment}", Snackbar.LENGTH_SHORT).show()
-                        docRef?.set(image)
-                            ?.addOnSuccessListener {
-                                Log.d(TAG, "Success add to db the ${file.lastPathSegment}")
-                                val fireCollection = FirebaseFirestore.getInstance().collection("images/${character}/${mAuth?.uid}")
-                                load_imagesName(fireCollection)
-                            }?.addOnFailureListener{
+                    uploadTask?.addOnCompleteListener{
+                        touchMenuButton.backgroundTintList =
+                                ColorStateList(stateList, intArrayOf(closeColor_touchMenu, openColor))
+                        touchMenuButton.isEnabled = true
+                        if(it.isSuccessful) {
+                            Log.d(TAG, "Success upload the ${file.lastPathSegment}")
+                            Snackbar.make(imagesLayout, "Success upload the image", Snackbar.LENGTH_SHORT).show()
+
+                            docRef?.set(image)
+                                ?.addOnSuccessListener {
+                                    Log.d(TAG, "Success add to db the ${file.lastPathSegment}")
+                                    val fireCollection =
+                                        FirebaseFirestore.getInstance().collection("images/${character}/${mAuth?.uid}")
+                                    load_imagesName(fireCollection, -1)
+                                }?.addOnFailureListener {
                                     Log.d(TAG, "Fail add to db the ${file.lastPathSegment}")
-                            }
-                    }
-                        ?.addOnFailureListener {
+                                }
+                        }else{
                             Log.d(TAG, "Fail upload the ${file.lastPathSegment}")
-                            Snackbar.make(imagesLayout, "Fail upload the ${file.lastPathSegment}", Snackbar.LENGTH_SHORT).show()
+                            Snackbar.make(imagesLayout, "Fail upload the image", Snackbar.LENGTH_SHORT).show()
                         }
+                    }
                 }
             }
         }

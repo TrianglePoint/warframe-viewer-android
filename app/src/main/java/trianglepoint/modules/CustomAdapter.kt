@@ -40,9 +40,10 @@ public class CustomAdapter(inflater: LayoutInflater) : PagerAdapter(){
 
         if(wantGray){
             val matrix = ColorMatrix()
-            matrix.setSaturation(0 as Float) // 0 is grayScale.
+            val zero_float0 = 0
+            matrix.setSaturation(zero_float0.toFloat()) // 0 is grayScale.
             val cf = ColorMatrixColorFilter(matrix)
-            img.setColorFilter(cf)// For apply matrix to ImageView, Should ColorMatrixColorFilter.
+            img.colorFilter = cf // For apply matrix to ImageView, Should ColorMatrixColorFilter.
         }
         container.addView(view) // Shows the Pager.
         return view
@@ -54,6 +55,9 @@ public class CustomAdapter(inflater: LayoutInflater) : PagerAdapter(){
     }
     override fun isViewFromObject(view: View, `object`: Any): Boolean {
         return view == `object`
+    }
+    fun getarr_name(): ArrayList<String>{
+        return this.arr_name
     }
     fun setarr_name(arr: ArrayList<String>){
         this.arr_name = arr
