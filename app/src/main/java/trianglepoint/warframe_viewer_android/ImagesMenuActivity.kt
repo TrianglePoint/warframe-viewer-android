@@ -33,9 +33,89 @@ class ImagesMenuActivity : AppCompatActivity(){
             intent.putExtra("character", "ash")
             startActivity(intent)
         }
+        btn_atlas.setOnClickListener {
+            val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "atlas")
+            startActivity(intent)
+        }
         btn_ember.setOnClickListener {
             val intent = Intent(this, ImagesActivity::class.java)
             intent.putExtra("character", "ember")
+            startActivity(intent)
+        }
+        btn_excalibur.setOnClickListener {
+            val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "excalibur")
+            startActivity(intent)
+        }
+        btn_frost.setOnClickListener {
+            val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "frost")
+            startActivity(intent)
+        }
+        btn_ivara.setOnClickListener {
+            val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "ivara")
+            startActivity(intent)
+        }
+        btn_limbo.setOnClickListener {
+            val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "limbo")
+            startActivity(intent)
+        }
+        btn_loki.setOnClickListener {
+            val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "loki")
+            startActivity(intent)
+        }
+        btn_mag.setOnClickListener {
+            val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "mag")
+            startActivity(intent)
+        }
+        btn_mesa.setOnClickListener {
+            val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "mesa")
+            startActivity(intent)
+        }
+        btn_mirage.setOnClickListener {
+            val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "mirage")
+            startActivity(intent)
+        }
+        btn_nidus.setOnClickListener {
+            val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "nidus")
+            startActivity(intent)
+        }
+        btn_nova.setOnClickListener {
+            val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "nova")
+            startActivity(intent)
+        }
+        btn_oberon.setOnClickListener {
+            val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "oberon")
+            startActivity(intent)
+        }
+        btn_octavia.setOnClickListener {
+            val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "octavia")
+            startActivity(intent)
+        }
+        btn_rhino.setOnClickListener {
+            val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "rhino")
+            startActivity(intent)
+        }
+        btn_vauban.setOnClickListener {
+            val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "vauban")
+            startActivity(intent)
+        }
+        btn_volt.setOnClickListener {
+            val intent = Intent(this, ImagesActivity::class.java)
+            intent.putExtra("character", "volt")
             startActivity(intent)
         }
     }

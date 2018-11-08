@@ -5,6 +5,7 @@ import android.graphics.Typeface
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_news.*
@@ -20,8 +21,9 @@ class NewsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_news)
         val firebaseInstanceIDService = firebaseInstanceIDService()
         firebaseInstanceIDService.onTokenRefresh()
-
+        loadingNews.visibility = View.VISIBLE
         loadScreen(lLayout)
+        loadingNews.visibility = View.GONE
     }
 
     fun loadScreen(lLayout: LinearLayout){
