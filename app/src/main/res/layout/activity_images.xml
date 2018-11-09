@@ -40,9 +40,15 @@
             <android.support.design.widget.FloatingActionButton
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:clickable="true" app:srcCompat="@android:drawable/ic_menu_upload"
+                    android:clickable="true" app:srcCompat="@android:drawable/stat_sys_upload"
                     android:id="@+id/button_upload" app:backgroundTint="#333333" app:rippleColor="#e9e9e9"
                     android:layout_marginBottom="10dp"/>
+            <android.support.design.widget.FloatingActionButton
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true" app:srcCompat="@android:drawable/stat_sys_download"
+                    android:id="@+id/button_download" app:backgroundTint="#333333" app:rippleColor="#e9e9e9"
+                    android:layout_marginBottom="10dp" android:visibility="gone"/>
             <android.support.design.widget.FloatingActionButton
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

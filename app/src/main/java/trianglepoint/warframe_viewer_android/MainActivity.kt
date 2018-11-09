@@ -52,9 +52,11 @@ class MainActivity : AppCompatActivity(){
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(requestCode == RC_SIGN_IN){
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data) as Task<GoogleSignInAccount>
-            handleSignInResult(task)
+        when(requestCode){
+            RC_SIGN_IN->{
+                val task = GoogleSignIn.getSignedInAccountFromIntent(data) as Task<GoogleSignInAccount>
+                handleSignInResult(task)
+            }
         }
     }
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>){

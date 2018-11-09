@@ -2,21 +2,29 @@ package trianglepoint.warframe_viewer_android
 
 import android.content.Intent
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.*
 import kotlinx.android.synthetic.main.activity_images_menu.*
+import trianglepoint.modules.TextAnimation
 
 class ImagesMenuActivity : AppCompatActivity(){
     private val TAG = "ImagesMenuActivity_1"
     private var mAuth: FirebaseAuth? = null
     var mGoogleSignInClient : GoogleSignInClient? = null
 
+    var r : TextAnimation? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_images_menu)
+
+        val permission_array = arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        // Request Permission of storage.
+        ActivityCompat.requestPermissions(this, permission_array, 0)
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
@@ -118,6 +126,17 @@ class ImagesMenuActivity : AppCompatActivity(){
             intent.putExtra("character", "volt")
             startActivity(intent)
         }
+
+        // Sometimes, ordis say.
+        r = TextAnimation(textView_ordis, textbackground_ordis)
+        r?.say_welcome()
+        val t1 = Thread(r)
+        t1.start()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        r?.terminate()
     }
 
     private fun signOut(){

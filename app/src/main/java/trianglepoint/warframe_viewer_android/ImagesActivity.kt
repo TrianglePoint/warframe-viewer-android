@@ -4,8 +4,10 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.support.design.widget.Snackbar
+import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
@@ -17,7 +19,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_images.*
 import trianglepoint.modules.CustomAdapter
+import java.io.File
 import java.util.*
+import java.util.jar.Manifest
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
@@ -96,6 +100,50 @@ class ImagesActivity : AppCompatActivity(){
         button_upload.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             startActivityForResult(intent, SELECT_IMAGE)
+        }
+        button_download.setOnClickListener {
+            // Position of want download image.
+            val currentItem = imagePager.currentItem
+
+            val arr_name = adapter?.getarr_name() as ArrayList<String>
+            Log.d(TAG, "download position: $currentItem")
+
+            val downloadRef = storageRef?.child("${arr_name[currentItem]}")
+
+            var temp_name = arr_name[currentItem]
+            var temp_j = temp_name.length - 1
+            while(temp_name[temp_j] != '_'){
+                temp_j--
+            }
+            var temp_i = temp_j
+            while(temp_name[temp_i] != '/'){
+                temp_i--
+            }
+
+            val download_path = "${Environment.getExternalStorageDirectory()}/DCIM/WarViewer"
+            val downloadFimename = "/${temp_name.substring(temp_i + 1, temp_j)}.jpg"
+
+            val folder = File(download_path)
+
+            if(!(folder.exists())){
+                // Create folder.
+                folder.mkdir()
+            }
+
+            Log.d(TAG, "download_path : $download_path$downloadFimename")
+            val localFile = File(download_path+downloadFimename)
+
+            // Download image.
+            downloadRef?.getFile(localFile)
+                ?.addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        Log.d(TAG, "Success download the image: ${localFile.path}")
+                        Snackbar.make(imagesLayout, "Downloaded image\n${localFile.path}", Snackbar.LENGTH_LONG).show()
+                    }else{
+                        Log.d(TAG, "Fail download the image")
+                        Snackbar.make(imagesLayout, "Fail Download image", Snackbar.LENGTH_SHORT).show()
+                    }
+                }
         }
         button_delete.setOnClickListener {
             // Open deleteMenu.
@@ -205,10 +253,12 @@ class ImagesActivity : AppCompatActivity(){
 
                 if(array.size == 0){
                     button_saturation.visibility = View.GONE
+                    button_download.visibility = View.GONE
                     button_delete.visibility = View.GONE
                     noneImage.visibility = View.VISIBLE
                 }else{
                     button_saturation.visibility = View.VISIBLE
+                    button_download.visibility = View.VISIBLE
                     button_delete.visibility = View.VISIBLE
                     noneImage.visibility = View.GONE
                 }

@@ -5,7 +5,6 @@ import android.graphics.Typeface
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_news.*
@@ -21,13 +20,11 @@ class NewsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_news)
         val firebaseInstanceIDService = firebaseInstanceIDService()
         firebaseInstanceIDService.onTokenRefresh()
-        loadingNews.visibility = View.VISIBLE
+
         loadScreen(lLayout)
-        loadingNews.visibility = View.GONE
     }
 
-    fun loadScreen(lLayout: LinearLayout){
-
+    fun loadScreen(lLayout: LinearLayout) {
         // Load Json data as string.
         val result = LoadTask().execute("$url/json").get()
 
@@ -55,10 +52,13 @@ class NewsActivity : AppCompatActivity() {
         // and take out the jsonArray.
         var jsonArray = jsonObject.get("events") as JSONArray
 
-        for(i in 0..(jsonArray.length()-1)) {
+        for (i in 0..(jsonArray.length() - 1)) {
             textView = TextView(this)
-            val data = arrayOf(jsonArray.getJSONObject(i).getString("subject"),
-                jsonArray.getJSONObject(i).getString("link"))
+            val data = arrayOf(
+                jsonArray.getJSONObject(i).getString("subject"),
+                jsonArray.getJSONObject(i).getString("link")
+            )
+
             lLayout.addView(textView)
 
             textView.setOnClickListener {
@@ -90,10 +90,12 @@ class NewsActivity : AppCompatActivity() {
 
         jsonArray = jsonObject.get("update") as JSONArray
 
-        for(i in 0..(jsonArray.length()-1)) {
+        for (i in 0..(jsonArray.length() - 1)) {
             textView = TextView(this)
-            val data = arrayOf(jsonArray.getJSONObject(i).getString("subject"),
-                jsonArray.getJSONObject(i).getString("link"))
+            val data = arrayOf(
+                jsonArray.getJSONObject(i).getString("subject"),
+                jsonArray.getJSONObject(i).getString("link")
+            )
             lLayout.addView(textView)
 
             textView.setOnClickListener {
