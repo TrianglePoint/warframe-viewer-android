@@ -70,7 +70,7 @@ class ImagesActivity : AppCompatActivity(){
         load_imagesName(fireCollection, -1)
 
         GlideApp.with(this)
-            .load(storageRef?.child("public/nothing.jpg"))
+            .load(storageRef?.child("public/noneImage.png"))
             .into(noneImage)
 
         touchMenuButton.setOnClickListener {
