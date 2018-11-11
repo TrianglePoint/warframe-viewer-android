@@ -67,30 +67,32 @@ class TextAnimation(textView: TextView, textBackground: ImageView) : AppCompatAc
                     textView?.text = text.substring(0, i)
                 }
                 try {
-                    if (text[i - 1] == ',') {
+                    // note: "i - 1" is last character at current shown text.
+
+                    if (text[i - 1] == ',') { // ex) hahaha[,]
                         Thread.sleep(200)
                     } else if (text[i - 1] == '.') {
                         if (text[i] != '.') {
-                            if (text[i] != '!' && text[i] != '?' && text[i] != '*') {
+                            if (text[i] != '!' && text[i] != '?' && text[i] != '*') { // ex) hahaha, hi[.]
                                 Thread.sleep(400)
                             }
                         } else {
-                            if (text[i + 1] != '!' && text[i + 1] != '?') {
+                            if (text[i + 1] != '!' && text[i + 1] != '?') { // ex) oh..[.]
                                 Thread.sleep(200)
                             }
                         }
                     } else if (text[i - 1] == '?' || text[i - 1] == '!') {
-                        if (text[i] != '*') {
+                        if (text[i] != '*') { // ex) operator[?]   or   Angry..[!]
                             Thread.sleep(400)
                         }
                     }
-                    Thread.sleep(50)
+                    Thread.sleep(50) // Common print speed of text.
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
                 i++
             }
-            if(!(wantRun)){
+            if(!(wantRun)){ // When destroy the activity.
                 runOnUiThread {
                     textView?.text = ""
                     textBackground?.visibility = View.GONE
@@ -98,7 +100,7 @@ class TextAnimation(textView: TextView, textBackground: ImageView) : AppCompatAc
                 break
             }
             runOnUiThread {
-                textView?.text = text
+                textView?.text = text // last character(complete text).
             }
             try {
                 if(should_welcome){
@@ -116,9 +118,9 @@ class TextAnimation(textView: TextView, textBackground: ImageView) : AppCompatAc
         }
     }
     fun say_welcome(){
-        should_welcome = true
+        should_welcome = true // Welcome, operator!
     }
-    fun terminate(){
+    fun terminate(){ // Stop say, ordis.
         wantRun = false
         should_welcome = false
     }
